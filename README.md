@@ -33,3 +33,19 @@ python password_generator.py --info
 - Длины пароля
 
 Программа автоматически проверяет минимальную рекомендуемую длину для каждого уровня сложности и предупреждает пользователя, если пароль слишком короткий.
+
+## Запуск тестов:
+# Установка зависимостей
+pip install -r requirements-test.txt
+
+# Запуск всех тестов
+pytest -v
+
+# Запуск с покрытием кода
+pytest --cov=password_generator --cov-report=html
+
+# Запуск конкретного тестового файла
+pytest test_password_generator.py -v
+
+# Запуск тестов с определенным маркером
+pytest -m "parametrize" -v
