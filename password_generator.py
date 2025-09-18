@@ -78,6 +78,11 @@ def main():
     parser.add_argument('--info', action='store_true',
                        help='Показать информацию о уровнях сложности')
     
+    # Исправляем обработку аргументов
+    if len(sys.argv) == 1:
+        interactive_mode()
+        return
+    
     args = parser.parse_args()
     generator = PasswordGenerator()
     
@@ -156,7 +161,7 @@ def interactive_mode():
         print()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main()
-    else:
+    if len(sys.argv) == 1:
         interactive_mode()
+    else:
+        main()

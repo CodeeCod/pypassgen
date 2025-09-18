@@ -71,14 +71,14 @@ class TestPasswordGenerator:
             generator.generate_password(10, 'invalid')
     
     @pytest.mark.parametrize("password,expected_strength", [
-        ('abc', 1),  # только lowercase
-        ('abcABC', 2),  # lowercase + uppercase
-        ('abc123', 2),  # lowercase + digits
-        ('abcABC123', 3),  # lowercase + uppercase + digits
-        ('abcABC123!', 4),  # все категории
-        ('a' * 4, 1),  # короткий пароль
-        ('a' * 12, 2),  # длинный пароль с одним типом символов
-        ('aA1!' * 4, 5),  # все категории + хорошая длина
+        ('abc', 2),  # только lowercase + длина (1+1)
+        ('abcABC', 3),  # lowercase + uppercase + длина (2+1)
+        ('abc123', 3),  # lowercase + digits + длина (2+1)
+        ('abcABC123', 5),  # lowercase + uppercase + digits + длина (3+2)
+        ('abcABC123!', 6),  # все категории + длина (4+2)
+        ('a' * 4, 2),  # короткий пароль (1+1)
+        ('a' * 12, 4),  # длинный пароль с одним типом символов (1+3)
+        ('aA1!' * 4, 7),  # все категории + хорошая длина (4+3)
     ])
     def test_calculate_strength(self, generator, password, expected_strength):
         """Тест оценки сложности пароля"""
