@@ -71,11 +71,12 @@ class TestPasswordGenerator:
             generator.generate_password(10, 'invalid')
     
     @pytest.mark.parametrize("password,expected_strength", [
-        ('abc', 2),  # только lowercase + длина (1+1)
-        ('abcABC', 3),  # lowercase + uppercase + длина (2+1)
-        ('abc123', 3),  # lowercase + digits + длина (2+1)
-        ('abcABC123', 5),  # lowercase + uppercase + digits + длина (3+2)
-        ('abcABC123!', 6),  # все категории + длина (4+2)
+        ('abc', 1),  # только lowercase + длина 0 (1+0)
+        ('abcd', 2),  # только lowercase + длина 1 (1+1)
+        ('abcABC', 3),  # lowercase + uppercase + длина 1 (2+1)
+        ('abc123', 3),  # lowercase + digits + длина 1 (2+1)
+        ('abcABC123', 5),  # lowercase + uppercase + digits + длина 2 (3+2)
+        ('abcABC123!', 6),  # все категории + длина 2 (4+2)
         ('a' * 4, 2),  # короткий пароль (1+1)
         ('a' * 12, 4),  # длинный пароль с одним типом символов (1+3)
         ('aA1!' * 4, 7),  # все категории + хорошая длина (4+3)
