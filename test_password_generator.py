@@ -19,49 +19,89 @@ class TestPasswordGenerator:
         """Тест инициализации генератора"""
         assert generator is not None
         assert hasattr(generator, 'complexity_levels')
-        assert 'low' in generator.complexity_levels
-        assert 'very-high' in generator.complexity_levels
+        assert len(generator.complexity_levels) == 4
     
-    @pytest.mark.parametrize("complexity,expected_chars", [
-        ('low', string.ascii_lowercase),
-        ('medium', string.ascii_letters),
-        ('high', string.ascii_letters + string.digits),
-        ('very-high', string.ascii_letters + string.digits + string.punctuation)
+    def test_complexity_levels_structure(self, generator):
+        """Тест структуры уровней сложности"""
+        levels = generator.complexity_levels
+        assert levels[0]['name'] == 'low'
+        assert levels[1]['name'] == 'medium'
+        assert levels[2]['name'] == 'high'
+        assert levels[3]['name'] == 'very-high'
+    
+    @pytest.mark.parametrize("index,expected_name", [
+        (0, 'low'),
+        (1, 'medium'),
+        (2, 'high'),
+        (3, 'very-high'),
+        (4, None),  # Несуществующий индекс
+        (-1, None),  # Отрицательный индекс
     ])
-    def test_complexity_chars(self, generator, complexity, expected_chars):
+    def test_get_complexity_by_index(self, generator, index, expected_name):
+        """Тест получения уровня сложности по индексу"""
+        result = generator.get_complexity_by_index(index)
+        if expected_name:
+            assert result['name'] == expected_name
+        else:
+            assert result is None
+    
+    @pytest.mark.parametrize("name,expected", [
+        ('low', True),
+        ('medium', True),
+        ('high', True),
+        ('very-high', True),
+        ('invalid', False),  # Несуществующее имя
+    ])
+    def test_get_complexity_by_name(self, generator, name, expected):
+        """Тест получения уровня сложности по имени"""
+        result = generator.get_complexity_by_name(name)
+        if expected:
+            assert result['name'] == name
+        else:
+            assert result is None
+    
+    @pytest.mark.parametrize("index,expected_chars", [
+        (0, string.ascii_lowercase),
+        (1, string.ascii_letters),
+        (2, string.ascii_letters + string.digits),
+        (3, string.ascii_letters + string.digits + string.punctuation)
+    ])
+    def test_complexity_chars(self, generator, index, expected_chars):
         """Тест правильности наборов символов для каждого уровня сложности"""
-        assert generator.complexity_levels[complexity]['chars'] == expected_chars
+        level = generator.get_complexity_by_index(index)
+        assert level['chars'] == expected_chars
     
-    @pytest.mark.parametrize("complexity,min_length", [
-        ('low', 4),
-        ('medium', 6),
-        ('high', 8),
-        ('very-high', 10)
+    @pytest.mark.parametrize("index,min_length", [
+        (0, 4),
+        (1, 6),
+        (2, 8),
+        (3, 10)
     ])
-    def test_complexity_min_length(self, generator, complexity, min_length):
+    def test_complexity_min_length(self, generator, index, min_length):
         """Тест минимальной длины для каждого уровня сложности"""
-        assert generator.complexity_levels[complexity]['min_length'] == min_length
+        level = generator.get_complexity_by_index(index)
+        assert level['min_length'] == min_length
     
-    @pytest.mark.parametrize("length,complexity", [
+    @pytest.mark.parametrize("length,complexity_name", [
         (8, 'low'),
         (10, 'medium'),
         (12, 'high'),
         (15, 'very-high')
     ])
-    def test_generate_password_length(self, generator, length, complexity):
+    def test_generate_password_length(self, generator, length, complexity_name):
         """Тест генерации пароля правильной длины"""
-        password = generator.generate_password(length, complexity)
+        password = generator.generate_password(length, complexity_name)
         assert len(password) == length
     
-    @pytest.mark.parametrize("complexity,expected_chars", [
+    @pytest.mark.parametrize("complexity_name,expected_chars", [
         ('low', string.ascii_lowercase),
         ('medium', string.ascii_letters),
         ('high', string.ascii_letters + string.digits),
         ('very-high', string.ascii_letters + string.digits + string.punctuation)
     ])
-    def test_generate_password_chars(self, generator, complexity, expected_chars):
+    def test_generate_password_chars(self, generator, complexity_name, expected_chars):
         """Тест что пароль содержит только разрешенные символы"""
-        password = generator.generate_password(20, complexity)
+        password = generator.generate_password(20, complexity_name)
         for char in password:
             assert char in expected_chars
     
@@ -90,8 +130,8 @@ class TestPasswordGenerator:
         generator.display_complexity_info()
         captured = capsys.readouterr()
         assert "Уровни сложности паролей" in captured.out
-        assert "low" in captured.out
-        assert "very-high" in captured.out
+        assert "1." in captured.out  # Проверяем нумерацию
+        assert "4." in captured.out  # Проверяем нумерацию
 
 
 class TestPasswordGeneratorIntegration:
@@ -127,15 +167,15 @@ class TestEdgeCases:
     def generator(self):
         return PasswordGenerator()
     
-    @pytest.mark.parametrize("complexity,min_length", [
+    @pytest.mark.parametrize("complexity_name,min_length", [
         ('low', 4),
         ('medium', 6),
         ('high', 8),
         ('very-high', 10)
     ])
-    def test_minimum_length_generation(self, generator, complexity, min_length):
+    def test_minimum_length_generation(self, generator, complexity_name, min_length):
         """Тест генерации пароля минимальной длины"""
-        password = generator.generate_password(min_length, complexity)
+        password = generator.generate_password(min_length, complexity_name)
         assert len(password) == min_length
     
     def test_very_long_password(self, generator):

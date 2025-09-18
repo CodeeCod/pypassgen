@@ -5,39 +5,57 @@ import sys
 
 class PasswordGenerator:
     def __init__(self):
-        self.complexity_levels = {
-            'low': {
+        self.complexity_levels = [
+            {
+                'name': 'low',
                 'description': 'Только буквы (нижний регистр)',
                 'chars': string.ascii_lowercase,
                 'min_length': 4
             },
-            'medium': {
+            {
+                'name': 'medium',
                 'description': 'Буквы верхнего и нижнего регистра',
                 'chars': string.ascii_letters,
                 'min_length': 6
             },
-            'high': {
+            {
+                'name': 'high',
                 'description': 'Буквы + цифры',
                 'chars': string.ascii_letters + string.digits,
                 'min_length': 8
             },
-            'very-high': {
+            {
+                'name': 'very-high',
                 'description': 'Буквы + цифры + специальные символы',
                 'chars': string.ascii_letters + string.digits + string.punctuation,
                 'min_length': 10
             }
-        }
+        ]
     
-    def generate_password(self, length, complexity):
+    def get_complexity_by_index(self, index):
+        """Получить уровень сложности по индексу"""
+        if 0 <= index < len(self.complexity_levels):
+            return self.complexity_levels[index]
+        return None
+    
+    def get_complexity_by_name(self, name):
+        """Получить уровень сложности по имени"""
+        for level in self.complexity_levels:
+            if level['name'] == name:
+                return level
+        return None
+    
+    def generate_password(self, length, complexity_name):
         """Генерация пароля заданной длины и сложности"""
-        if complexity not in self.complexity_levels:
-            raise ValueError(f"Неизвестный уровень сложности: {complexity}")
+        complexity = self.get_complexity_by_name(complexity_name)
+        if complexity is None:
+            raise ValueError(f"Неизвестный уровень сложности: {complexity_name}")
         
-        chars = self.complexity_levels[complexity]['chars']
-        min_length = self.complexity_levels[complexity]['min_length']
+        chars = complexity['chars']
+        min_length = complexity['min_length']
         
         if length < min_length:
-            print(f"⚠️  Внимание: для сложности '{complexity}' рекомендуется длина не менее {min_length} символов")
+            print(f"⚠️  Внимание: для сложности '{complexity_name}' рекомендуется длина не менее {min_length} символов")
         
         # Генерация пароля
         password = ''.join(random.choice(chars) for _ in range(length))
@@ -62,8 +80,8 @@ class PasswordGenerator:
         """Показать информацию о уровнях сложности"""
         print("\n📊 Уровни сложности паролей:")
         print("-" * 50)
-        for level, info in self.complexity_levels.items():
-            print(f"{level:12} - {info['description']} (мин. длина: {info['min_length']})")
+        for i, level in enumerate(self.complexity_levels, 1):
+            print(f"{i}. {level['name']:12} - {level['description']} (мин. длина: {level['min_length']})")
         print()
 
 def main():
@@ -117,17 +135,22 @@ def interactive_mode():
     print("🎯 Интерактивный генератор паролей")
     print("=" * 50)
     
-    # Выбор сложности
+    # Выбор сложности через номер
     generator.display_complexity_info()
     
     while True:
-        complexity = input("Выберите уровень сложности (low/medium/high/very-high): ").lower()
-        if complexity in generator.complexity_levels:
-            break
-        print("❌ Неверный выбор. Попробуйте снова.")
+        try:
+            choice = int(input("Выберите уровень сложности (введите номер 1-4): "))
+            complexity = generator.get_complexity_by_index(choice - 1)
+            if complexity:
+                complexity_name = complexity['name']
+                break
+            print("❌ Неверный номер. Попробуйте снова.")
+        except ValueError:
+            print("❌ Введите число от 1 до 4.")
     
     # Выбор длины
-    min_length = generator.complexity_levels[complexity]['min_length']
+    min_length = complexity['min_length']
     while True:
         try:
             length = int(input(f"Введите длину пароля (мин. {min_length}): "))
@@ -149,10 +172,11 @@ def interactive_mode():
     
     # Генерация
     print(f"\n🔐 Результаты:")
+    print(f"   Сложность: {complexity_name}")
     print("-" * 40)
     
     for i in range(count):
-        password = generator.generate_password(length, complexity)
+        password = generator.generate_password(length, complexity_name)
         strength = generator.calculate_strength(password)
         strength_stars = "★" * strength + "☆" * (8 - strength)
         

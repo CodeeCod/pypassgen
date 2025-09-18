@@ -57,8 +57,8 @@ class TestCLI:
         
         assert result.returncode == 0
         assert 'Уровни сложности паролей' in result.stdout
-        assert 'low' in result.stdout
-        assert 'very-high' in result.stdout
+        assert '1.' in result.stdout  # Проверяем нумерацию
+        assert '4.' in result.stdout  # Проверяем нумерацию
     
     def test_cli_invalid_complexity(self):
         """Тест неверного уровня сложности"""
@@ -74,8 +74,8 @@ class TestCLI:
     @patch('builtins.print')
     def test_interactive_mode(self, mock_print, mock_input):
         """Тест интерактивного режима"""
-        # Мокируем ввод пользователя
-        mock_input.side_effect = ['high', '12', '2']
+        # Мокируем ввод пользователя: выбор сложности (1-4), длина, количество
+        mock_input.side_effect = ['2', '12', '2']  # medium complexity
         
         # Запускаем интерактивный режим
         interactive_mode()
